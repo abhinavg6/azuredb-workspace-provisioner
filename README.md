@@ -1,2 +1,30 @@
 # azuredb-workspace-provisioner
-Sample project for how to provision and bootstrap an Azure Databricks workspace
+Sample project provisioning and bootstrapping an Azure Databricks workspace
+
+## Project Structure
+The project is composed of separate scripts reusing common objects and configuration, where each could be run on its own at any point of your workspace provisioning/bootstrapping lifecycle. All actions against Azure Management API and Databricks API are performed using a previously configured Service Principal (AAD App).
+* azdbx_ws_deployer.py: Deploys a Log Analytics workspace, and then a Azure Databricks _No Public IP (NPIP)_ workspace that uses the Log Analytics workspace as its Audit/Diagnostic Logs target. We utilized the [Azure Deployment Sample](https://github.com/Azure-Samples/resource-manager-python-template-deployment) as inspiration.
+* azdbx_user_n_group_provisioner.py: Provisions AAD users and groups in the Azure Databricks workspace using the [Databricks SCIM API](https://docs.microsoft.com/en-us/azure/databricks/dev-tools/api/latest/scim/).
+* azdbx_notebook_provisioner.py: Provisions existing notebooks in user sandbox folders in the Azure Databricks workspaxce using the [Databricks Workspace API](https://docs.microsoft.com/en-us/azure/databricks/dev-tools/api/latest/workspace).
+* azdbx_cluster_n_job_provisioner.py: Creates a [high-concurrency cluster](https://docs.microsoft.com/en-us/azure/databricks/clusters/configure#--high-concurrency-clusters) for data science/analysis, and a on-demand job for ad-hoc execution, in the Azure Databricks workspace using [Databricks Cluster API](https://docs.microsoft.com/en-us/azure/databricks/dev-tools/api/latest/clusters) and [Jobs API](https://docs.microsoft.com/en-us/azure/databricks/dev-tools/api/latest/jobs) respectively. It also sets user permissions for the cluster and job using a `preview` _Permissions API_.
+* azdbx_azure_oauth2_client.py: A client to get the AAD access and management tokens for the service principal identity.
+* azdbx_api_client.py: A client to perform different above mentioned operations against the Databricks REST API.
+
+## Flow of the Execution
+Recommended execution steps in this order:
+* `python azdbx_ws_deployer.py` to deploy the ARM resources - Log Analytics and Azure Databricks workspaces.
+* `python azdbx_user_n_group_provisioner.py` to provision users and groups in the Azure Databricks workspace.
+* `python azdbx_notebook_provisioner.py` to import existing notebooks in the Azure Databricks workspace.
+* `python azdbx_cluster_n_job_provisioner.py` to create the cluster & job and set user permissions in the Azure Databricks workspace.
+
+## Requirements
+* `pip install azure-mgmt-resource` - To get Azure management & deployment tooling
+* `pip install requests` - To get _HTTP for Humans_ package to invoke the Azure Management * Databricks APIs. This is available by default in modern python distros.
+* Export/Set these [service principal credentials](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal) in your OS environment as `AZURE_CLIENT_ID` and `AZURE_CLIENT_SECRET`.
+* Export/Set the AAD Tenant Id in your OS environment as `AZURE_TENANT_ID`.
+* Export/Set the Azure Subscription Id and Resource Group Name in your OS environment as `AZURE_SUBSCRIPTION_ID` and `AZURE_RESOURCE_GROUP`.
+* Set relevant parameters in the ARM templates and related parameter files for your resource deployments.
+* Set relevant AAD users and related sandbox folder paths in the scripts, parameter files and object JSONs.
+* The default provided data science/analysis notebooks use processed data on a private ADLS Gen 2 storage account. Please feel free to use your own [notebook DBC(s)](https://docs.databricks.com/notebooks/notebooks-manage.html#databricks-archive) or change the existing ones to provide your own ADLS Gen 2 reference.
+
+**Note:** The _No Public IP (NPIP)_ mode for an Azure Databricks workspace and the _Permissions API_ are in `preview`. Please reach out to your Databricks or Microsoft account team for access, before starting to use this solution.

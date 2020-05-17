@@ -1,0 +1,5 @@
+{
+    "name": "adb-e2-automation-log-analytics-ws",
+    "location": "eastus2",
+    "sku": "pergb2018"
+}
