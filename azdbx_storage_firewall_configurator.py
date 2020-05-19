@@ -51,10 +51,10 @@ azdbx_azure_oauth2_client = AzureOAuth2Client()
 # Add the Storage service endpoint for Azure Databricks workspace subnets
 azdbx_azure_oauth2_client.add_service_endpoint_for_subnet(host_subnet_resource_id, "2020-04-01", 
     host_subnet_address_prefix, "Microsoft.Storage", host_subnet_delegation_name, nsg_resource_id, nsg_name)
-time.sleep(10)
+time.sleep(30)
 azdbx_azure_oauth2_client.add_service_endpoint_for_subnet(container_subnet_resource_id, "2020-04-01", 
     container_subnet_address_prefix, "Microsoft.Storage", container_subnet_delegation_name, nsg_resource_id, nsg_name)
-time.sleep(10)
+time.sleep(30)
 
 # Add the storage firewall rules to your ADLS Gen2 storage account for Azure Databricks subnets
 storage_resource_id = "/subscriptions/" + os.environ.get(
