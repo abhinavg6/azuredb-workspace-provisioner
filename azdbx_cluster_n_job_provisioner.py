@@ -3,16 +3,15 @@
 # a semi-automated manner via AAD app-based provisioning or in a manual way via
 # Databricks admin console.
 
+# This script expects that the following environment vars are set:
+#
+# AZURE_SUBSCRIPTION_ID: with your Azure Subscription Id
+# AZURE_RESOURCE_GROUP: with your Azure Resource Group
+
 import os
 import json
 
-from azdbx_azure_oauth2_client import AzureOAuth2Client
 from azdbx_api_client import DatabricksAPIClient
-
-# Create the Azure OAuth2 client and get AAD tokens to invoke Databricks API
-azure_oauth2_client = AzureOAuth2Client()
-aad_access_token = azure_oauth2_client.get_aad_access_token()
-aad_mgmt_token = azure_oauth2_client.get_aad_mgmt_token()
 
 # Get the Azure Databricks template parameters to get the deployed workspace's name
 adb_template_parameters = None
@@ -29,14 +28,14 @@ adb_workspace_resource_id = "/subscriptions/" + os.environ.get(
 print("The workspace resource id is {}".format(adb_workspace_resource_id))
 
 # Create the Databricks API client
-databricks_api_client = DatabricksAPIClient(aad_access_token, aad_mgmt_token, adb_workspace_resource_id)
+databricks_api_client = DatabricksAPIClient(adb_workspace_resource_id)
 print("The workspace URL is {}".format(databricks_api_client.get_url_prefix()))
 
 # Create a high-concurrency cluster to analyze processed data
 cluster_id = databricks_api_client.create_cluster("high_concurrency_cluster.json")
 
 # Set permissions for users on the cluster
-databricks_api_client.set_permission_on_cluster(cluster_id, "a.a@databricks.com", "CAN_MANAGE")
+databricks_api_client.set_permission_on_cluster(cluster_id, "a.g@databricks.com", "CAN_MANAGE")
 databricks_api_client.set_permission_on_cluster(cluster_id, "ag@gmail.com", "CAN_ATTACH_TO")
 
 # Create a on-demand job to run a notebook

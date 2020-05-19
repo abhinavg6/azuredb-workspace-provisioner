@@ -12,7 +12,7 @@ from azure.mgmt.resource.resources.models import DeploymentMode, Deployment, Dep
 
 # This script expects that the following environment vars are set:
 #
-# AZURE_TENANT_ID: with your Azure Active Directory tenant id or domain
+# AZURE_TENANT_ID: with your Azure Active Directory tenant id
 # AZURE_CLIENT_ID: with your Azure Active Directory Application / Service Principal Client ID
 # AZURE_CLIENT_SECRET: with your Azure Active Directory Application / Service Principal Secret
 # AZURE_SUBSCRIPTION_ID: with your Azure Subscription Id
@@ -96,5 +96,3 @@ adb_deployment_async_operation = client.deployments.create_or_update(
 adb_deployment_async_operation.wait()
 end_time = time.time()
 print("Deployed the Azure Databricks Workspace in {} seconds".format(str(int(end_time - start_time))))
-
-

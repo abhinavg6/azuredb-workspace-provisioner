@@ -85,7 +85,21 @@
 			"defaultValue": "10.179.64.0/18",
 			"type": "string",
 			"metadata": {
-				"description": "Cidr range for the public subnet.."
+				"description": "Cidr range for the public subnet."
+			}
+		},
+		"privateSubnetDelegationName": {
+			"defaultValue": "databricks-del-container",
+			"type": "string",
+			"metadata": {
+				"description": "Delegation name for the container subnet."
+			}
+		},
+		"publicSubnetDelegationName": {
+			"defaultValue": "databricks-del-host",
+			"type": "string",
+			"metadata": {
+				"description": "Delegation name for the host subnet."
 			}
 		},
 		"enableNoPublicIp": {
@@ -127,7 +141,7 @@
 								"id": "[variables('nsgId')]"
 							},
 							"delegations": [{
-								"name": "databricks-del-public",
+								"name": "[parameters('publicSubnetDelegationName')]",
 								"properties": {
 									"serviceName": "Microsoft.Databricks/workspaces"
 								}
@@ -142,7 +156,7 @@
 								"id": "[variables('nsgId')]"
 							},
 							"delegations": [{
-								"name": "databricks-del-private",
+								"name": "[parameters('privateSubnetDelegationName')]",
 								"properties": {
 									"serviceName": "Microsoft.Databricks/workspaces"
 								}

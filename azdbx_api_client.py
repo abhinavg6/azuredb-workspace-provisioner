@@ -9,6 +9,8 @@ import ssl
 
 from requests.adapters import HTTPAdapter
 
+from azdbx_azure_oauth2_client import AzureOAuth2Client
+
 try:
     from requests.packages.urllib3.poolmanager import PoolManager
     from requests.packages.urllib3 import exceptions
@@ -28,32 +30,29 @@ class TlsV1HttpAdapter(HTTPAdapter):
 
 class DatabricksAPIClient(object):
 
-    def __init__(self, aad_access_token, aad_mgmt_token, adb_workspace_resource_id):
+    def __init__(self, adb_workspace_resource_id):
         self.session = requests.Session()
         self.session.mount('https://', TlsV1HttpAdapter())
 
-        self.aad_access_token = aad_access_token
-        self.aad_mgmt_token = aad_mgmt_token
+        azure_oauth2_client = AzureOAuth2Client()
+        self.aad_access_token = azure_oauth2_client.get_aad_access_token()
+        self.aad_mgmt_token = azure_oauth2_client.get_aad_mgmt_token()
         self.headers = {
             'Authorization': 'Bearer ' +  self.aad_access_token,
             'X-Databricks-Azure-SP-Management-Token': self.aad_mgmt_token,
             'X-Databricks-Azure-Workspace-Resource-Id': adb_workspace_resource_id
         }
         
-        # Get the URL of the deployed Azure Databricks workspace using Management API
-        azdbx_mgmt_api_url = "https://management.azure.com" + adb_workspace_resource_id + "?api-version=2018-04-01"
-        azdbx_mgmt_api_resp = self.session.request('GET', azdbx_mgmt_api_url, verify = True, 
-            headers = {'Authorization': 'Bearer ' + self.aad_mgmt_token})
-        azdbx_mgmt_api_resp_json = azdbx_mgmt_api_resp.json()
-        self.urlPrefix = "https://" + azdbx_mgmt_api_resp_json['properties']['workspaceUrl'] + "/api/2.0"
+        # Get the URL of the deployed Azure Databricks workspace
+        self.url_prefix = azure_oauth2_client.get_azdbx_workspace_url(adb_workspace_resource_id, "2018-04-01")
 
     # Get the Azure Databricks workspace base endpoint
     def get_url_prefix(self):
-        return self.urlPrefix
+        return self.url_prefix
 
     # Utility method to invoke different APIs on the Azure Databricks workspace base endpoint
     def invoke_request(self, method, api_endpoint, payload):
-        resp = self.session.request(method, self.urlPrefix + api_endpoint, data=json.dumps(payload), 
+        resp = self.session.request(method, self.url_prefix + api_endpoint, data=json.dumps(payload), 
             verify = True, headers = self.headers)
         print("API response status code is {}".format(resp.status_code))
         resp_json = resp.json()
