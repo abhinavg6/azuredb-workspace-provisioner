@@ -9,7 +9,7 @@ The project is composed of separate scripts reusing common objects and configura
 * azdbx_notebook_provisioner.py: Provisions existing notebooks in user sandbox folders in the Azure Databricks workspace using the [Databricks Workspace API](https://docs.microsoft.com/en-us/azure/databricks/dev-tools/api/latest/workspace).
 * azdbx_cluster_n_job_provisioner.py: Creates a [high-concurrency cluster](https://docs.microsoft.com/en-us/azure/databricks/clusters/configure#--high-concurrency-clusters) for data science/analysis, and a on-demand job for ad-hoc execution, in the Azure Databricks workspace using [Databricks Cluster API](https://docs.microsoft.com/en-us/azure/databricks/dev-tools/api/latest/clusters) and [Jobs API](https://docs.microsoft.com/en-us/azure/databricks/dev-tools/api/latest/jobs) respectively. It also sets user permissions for the cluster and job using a `preview` _Permissions API_.
 * azdbx_azure_oauth2_client.py: A client to get the AAD access and management tokens for the service principal identity, and to perform operations on the Azure Management API for relevant resources.
-* azdbx_api_client.py: A client to perform different above mentioned operations against the Databricks REST API.
+* azdbx_api_client.py: A client to perform different above mentioned operations against the Databricks REST API. Currently it uses the python `requests` module to invoke the API directly. But it's highly recommended to use the [Databricks CLI API Client](https://github.com/abhinavg6/databricks-cli/blob/master/databricks_cli/sdk/api_client.py) to achieve the same without the need to write boilerplate HTTPS client code, and you get access to all Databricks APIs implicitly.
 
 ## Flow of the Execution
 Recommended execution steps in this order:
